@@ -10,7 +10,7 @@ interface Message {
   content: string;
 }
 
-const SAMPLE_RESPONSES = [
+const FALLBACK_RESPONSES = [
   "That's a great question! Here are some expert tips on this topic...",
   "Based on child development research, here's what I recommend...",
   "Many parents face this challenge. Let me share some proven strategies...",
@@ -65,6 +65,7 @@ export const Chat: React.FC = () => {
       content: input,
     };
 
+    const currentInput = input;
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
@@ -73,16 +74,48 @@ export const Chat: React.FC = () => {
       await supabase.from('chat_messages').insert({
         conversation_id: conversationId,
         role: 'user',
-        content: input,
+        content: currentInput,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const conversationHistory = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
 
-      const response = SAMPLE_RESPONSES[Math.floor(Math.random() * SAMPLE_RESPONSES.length)];
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-ai`;
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: currentInput,
+          conversationHistory: conversationHistory
+        })
+      });
+
+      let aiContent: string;
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.useFallback) {
+          aiContent = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)] +
+            '\n\n(Note: AI service temporarily unavailable. Using fallback responses.)';
+        } else {
+          throw new Error('Failed to get AI response');
+        }
+      } else {
+        const data = await response.json();
+        aiContent = data.response;
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response + '\n\nFor detailed advice, please provide more context about your child age.',
+        content: aiContent,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -94,6 +127,14 @@ export const Chat: React.FC = () => {
       });
     } catch (err) {
       console.error('Error:', err);
+
+      const fallbackMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)] +
+          '\n\n(Note: Unable to reach AI service. Please try again later.)',
+      };
+      setMessages((prev) => [...prev, fallbackMessage]);
     } finally {
       setLoading(false);
     }
