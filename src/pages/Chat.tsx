@@ -101,6 +101,7 @@ export const Chat: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Edge function error:', errorData);
         if (errorData.useFallback) {
           aiContent = FALLBACK_RESPONSES[Math.floor(Math.random() * FALLBACK_RESPONSES.length)] +
             '\n\n(Note: AI service temporarily unavailable. Using fallback responses.)';
