@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Sparkles, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface Milestone {
   id: string;
@@ -57,6 +58,10 @@ const MILESTONE_CATEGORIES = [
 export const Milestones: React.FC = () => {
   const navigate = useNavigate();
   const [achieved, setAchieved] = useState<Set<string>>(new Set());
+  const [childAge, setChildAge] = useState('');
+  const [aiInsights, setAiInsights] = useState('');
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [showAgeInput, setShowAgeInput] = useState(false);
 
   const toggleMilestone = (id: string) => {
     const newAchieved = new Set(achieved);
@@ -76,6 +81,68 @@ export const Milestones: React.FC = () => {
       pink: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700' },
     };
     return colors[color] || colors.blue;
+  };
+
+  const getAIInsights = async () => {
+    if (!childAge && achieved.size === 0) {
+      setShowAgeInput(true);
+      return;
+    }
+
+    setIsLoadingAI(true);
+    setAiInsights('');
+
+    try {
+      const achievedMilestones: string[] = [];
+      const notAchievedMilestones: string[] = [];
+
+      MILESTONE_CATEGORIES.forEach(category => {
+        category.milestones.forEach(milestone => {
+          const milestoneInfo = `${milestone.title} (${milestone.description}) in ${category.name}`;
+          if (achieved.has(milestone.id)) {
+            achievedMilestones.push(milestoneInfo);
+          } else {
+            notAchievedMilestones.push(milestoneInfo);
+          }
+        });
+      });
+
+      let message = '';
+      if (childAge) {
+        message = `Child's age: ${childAge} months. `;
+      }
+      message += `Achieved milestones: ${achievedMilestones.join(', ') || 'none yet'}. `;
+      if (notAchievedMilestones.length > 0) {
+        message += `Not yet achieved: ${notAchievedMilestones.slice(0, 5).join(', ')}. `;
+      }
+      message += `Provide personalized developmental insights including: 1) What's going well, 2) Age-appropriate activities to encourage upcoming milestones, 3) Any concerns if milestones are significantly delayed (with reassurance about normal variation), 4) Positive encouragement. Keep it supportive and practical.`;
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-ai`;
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await response.json();
+
+      if (data.response) {
+        setAiInsights(data.response);
+      } else {
+        setAiInsights('Unable to get AI insights at this time. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error getting AI insights:', error);
+      setAiInsights('Unable to get AI insights at this time. Please try again later.');
+    } finally {
+      setIsLoadingAI(false);
+      setShowAgeInput(false);
+    }
   };
 
   return (
@@ -155,6 +222,77 @@ export const Milestones: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {showAgeInput && (
+          <div className="mt-6 bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Child's Age (Optional)</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Providing your child's age helps us give more personalized insights.
+            </p>
+            <div className="flex items-center space-x-3">
+              <input
+                type="number"
+                value={childAge}
+                onChange={(e) => setChildAge(e.target.value)}
+                placeholder="Age in months"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                min="0"
+                max="60"
+              />
+              <button
+                onClick={getAIInsights}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              >
+                Continue
+              </button>
+              <button
+                onClick={() => {
+                  setShowAgeInput(false);
+                  getAIInsights();
+                }}
+                className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg font-semibold transition-colors"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!showAgeInput && (
+          <div className="mt-6">
+            <button
+              onClick={() => setShowAgeInput(true)}
+              disabled={isLoadingAI}
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-gray-400 disabled:to-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-all flex items-center justify-center space-x-2 shadow-md"
+            >
+              {isLoadingAI ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Analyzing Development...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  <span>Get AI Development Insights</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {aiInsights && (
+          <div className="mt-6 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg shadow-lg p-6 border border-cyan-200">
+            <div className="flex items-center space-x-2 mb-4">
+              <Sparkles className="w-6 h-6 text-cyan-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Personalized Development Insights</h3>
+            </div>
+            <div className="prose prose-sm max-w-none text-gray-700">
+              {aiInsights.split('\n').map((paragraph, idx) => (
+                paragraph.trim() && <p key={idx} className="mb-2">{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
