@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, AlertTriangle, Phone } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Phone, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface Symptom {
   id: string;
@@ -23,6 +24,8 @@ export const Emergency: React.FC = () => {
   const navigate = useNavigate();
   const [selectedSymptoms, setSelectedSymptoms] = useState<Set<string>>(new Set());
   const [showAssessment, setShowAssessment] = useState(false);
+  const [aiGuidance, setAiGuidance] = useState<string>('');
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   const toggleSymptom = (id: string) => {
     const newSymptoms = new Set(selectedSymptoms);
@@ -74,6 +77,47 @@ export const Emergency: React.FC = () => {
         'Keep a close watch on your child\'s symptoms and contact your pediatrician if they worsen.',
       action: 'Schedule a doctor\'s appointment if symptoms persist',
     };
+  };
+
+  const getAIGuidance = async () => {
+    if (selectedSymptoms.size === 0) return;
+
+    setIsLoadingAI(true);
+    setAiGuidance('');
+
+    try {
+      const selectedSymptomNames = SYMPTOMS
+        .filter(s => selectedSymptoms.has(s.id))
+        .map(s => `${s.name}: ${s.description}`)
+        .join(', ');
+
+      const message = `A parent has selected the following symptoms for their child: ${selectedSymptomNames}. Please provide specific, actionable guidance including: 1) What to watch for, 2) Immediate steps they can take, 3) Warning signs that require escalation. Keep it concise and practical. Emphasize calling emergency services for life-threatening symptoms.`;
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-ai`;
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await response.json();
+
+      if (data.response) {
+        setAiGuidance(data.response);
+      } else {
+        setAiGuidance('Unable to get AI guidance at this time. Please follow the recommendations above and contact healthcare professionals.');
+      }
+    } catch (error) {
+      console.error('Error getting AI guidance:', error);
+      setAiGuidance('Unable to get AI guidance at this time. Please follow the recommendations above and contact healthcare professionals.');
+    } finally {
+      setIsLoadingAI(false);
+    }
   };
 
   const recommendation = getRecommendation();
@@ -182,6 +226,36 @@ export const Emergency: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {selectedSymptoms.size > 0 && (
+          <div className="mt-6">
+            <button
+              onClick={getAIGuidance}
+              disabled={isLoadingAI}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+            >
+              {isLoadingAI ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Getting AI Guidance...</span>
+                </>
+              ) : (
+                <span>Get Detailed AI Guidance</span>
+              )}
+            </button>
+          </div>
+        )}
+
+        {aiGuidance && (
+          <div className="mt-6 bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">AI-Powered Guidance</h3>
+            <div className="prose prose-sm max-w-none text-gray-700">
+              {aiGuidance.split('\n').map((paragraph, idx) => (
+                <p key={idx} className="mb-2">{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="font-semibold text-blue-900 mb-2">Important Note</h3>
