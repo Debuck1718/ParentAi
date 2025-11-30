@@ -3,6 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Camera, Moon, Utensils, Syringe, TrendingUp, Activity, AlertCircle, BookOpen, Stethoscope, Calendar, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Child } from '../types';
+import { PhotoJournal } from '../components/PhotoJournal';
+import { SleepTracker } from '../components/SleepTracker';
+import { FeedingTracker } from '../components/FeedingTracker';
+import { VaccineRecords } from '../components/VaccineRecords';
+import { GrowthTracker } from '../components/GrowthTracker';
+import { DoctorNotes } from '../components/DoctorNotes';
 
 type TabType = 'overview' | 'photos' | 'sleep' | 'feeding' | 'vaccines' | 'growth' | 'milestones' | 'symptoms' | 'activities' | 'doctor';
 
@@ -149,15 +155,15 @@ export const ChildProfile: React.FC = () => {
 
           <div className="p-6">
             {activeTab === 'overview' && <OverviewTab childId={child.id} childName={child.name} />}
-            {activeTab === 'photos' && <PhotosTab childId={child.id} />}
-            {activeTab === 'sleep' && <SleepTab childId={child.id} />}
-            {activeTab === 'feeding' && <FeedingTab childId={child.id} />}
-            {activeTab === 'vaccines' && <VaccinesTab childId={child.id} />}
-            {activeTab === 'growth' && <GrowthTab childId={child.id} />}
+            {activeTab === 'photos' && <PhotoJournal childId={child.id} />}
+            {activeTab === 'sleep' && <SleepTracker childId={child.id} />}
+            {activeTab === 'feeding' && <FeedingTracker childId={child.id} />}
+            {activeTab === 'vaccines' && <VaccineRecords childId={child.id} />}
+            {activeTab === 'growth' && <GrowthTracker childId={child.id} />}
             {activeTab === 'milestones' && <MilestonesTab childId={child.id} />}
             {activeTab === 'symptoms' && <SymptomsTab childId={child.id} />}
             {activeTab === 'activities' && <ActivitiesTab childId={child.id} childDob={child.date_of_birth} />}
-            {activeTab === 'doctor' && <DoctorNotesTab childId={child.id} />}
+            {activeTab === 'doctor' && <DoctorNotes childId={child.id} />}
           </div>
         </div>
       </div>
@@ -214,75 +220,6 @@ const OverviewTab: React.FC<{ childId: string; childName: string }> = ({ childId
   );
 };
 
-const PhotosTab: React.FC<{ childId: string }> = ({ childId }) => {
-  return (
-    <div className="text-center py-12">
-      <Camera className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">Photo Journal</h3>
-      <p className="text-gray-600 mb-6">Capture and organize precious memories</p>
-      <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 mx-auto">
-        <Plus className="w-5 h-5" />
-        <span>Add Photo</span>
-      </button>
-    </div>
-  );
-};
-
-const SleepTab: React.FC<{ childId: string }> = ({ childId }) => {
-  return (
-    <div className="text-center py-12">
-      <Moon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">Sleep Tracking</h3>
-      <p className="text-gray-600 mb-6">Monitor sleep patterns and get AI-powered insights</p>
-      <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 mx-auto">
-        <Plus className="w-5 h-5" />
-        <span>Log Sleep</span>
-      </button>
-    </div>
-  );
-};
-
-const FeedingTab: React.FC<{ childId: string }> = ({ childId }) => {
-  return (
-    <div className="text-center py-12">
-      <Utensils className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">Feeding Tracker</h3>
-      <p className="text-gray-600 mb-6">Log meals and get nutrition recommendations</p>
-      <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 mx-auto">
-        <Plus className="w-5 h-5" />
-        <span>Log Feeding</span>
-      </button>
-    </div>
-  );
-};
-
-const VaccinesTab: React.FC<{ childId: string }> = ({ childId }) => {
-  return (
-    <div className="text-center py-12">
-      <Syringe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">Vaccine Schedule</h3>
-      <p className="text-gray-600 mb-6">Track immunizations and upcoming appointments</p>
-      <button className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 mx-auto">
-        <Plus className="w-5 h-5" />
-        <span>Add Vaccine</span>
-      </button>
-    </div>
-  );
-};
-
-const GrowthTab: React.FC<{ childId: string }> = ({ childId }) => {
-  return (
-    <div className="text-center py-12">
-      <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">Growth Charts</h3>
-      <p className="text-gray-600 mb-6">Track height, weight, and development percentiles</p>
-      <button className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 mx-auto">
-        <Plus className="w-5 h-5" />
-        <span>Add Measurement</span>
-      </button>
-    </div>
-  );
-};
 
 const MilestonesTab: React.FC<{ childId: string }> = ({ childId }) => {
   return (
@@ -323,16 +260,3 @@ const ActivitiesTab: React.FC<{ childId: string; childDob: string }> = ({ childI
   );
 };
 
-const DoctorNotesTab: React.FC<{ childId: string }> = ({ childId }) => {
-  return (
-    <div className="text-center py-12">
-      <Stethoscope className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">Pediatrician Notes</h3>
-      <p className="text-gray-600 mb-6">Keep all medical visits and prescriptions organized</p>
-      <button className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 mx-auto">
-        <Plus className="w-5 h-5" />
-        <span>Add Visit Note</span>
-      </button>
-    </div>
-  );
-};
