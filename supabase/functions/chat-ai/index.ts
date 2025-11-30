@@ -72,9 +72,11 @@ Deno.serve(async (req: Request) => {
       const error = await response.text();
       console.error("Groq API error:", error);
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Failed to get AI response",
-          useFallback: true 
+          details: error,
+          status: response.status,
+          useFallback: true
         }),
         {
           status: 500,
