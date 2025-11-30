@@ -7,6 +7,7 @@ import { Chat } from './pages/Chat';
 import { Milestones } from './pages/Milestones';
 import { Emergency } from './pages/Emergency';
 import { Community } from './pages/Community';
+import { ChildProfile } from './pages/ChildProfile';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, loading } = useAuth();
@@ -83,6 +84,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Community />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/child/:childId"
+        element={
+          <ProtectedRoute>
+            <ChildProfile />
           </ProtectedRoute>
         }
       />

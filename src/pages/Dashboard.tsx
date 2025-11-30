@@ -160,7 +160,7 @@ export const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => navigate('/milestones')}
+                    onClick={() => navigate(`/child/${child.id}`)}
                     className="text-blue-600 text-xs font-semibold hover:text-blue-700 mt-3 flex items-center space-x-1 group-hover:space-x-2 transition-all"
                   >
                     <span>View Profile</span>
