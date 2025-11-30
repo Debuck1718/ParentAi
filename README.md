@@ -43,6 +43,56 @@ ParentAI is a comprehensive web application designed to support parents with int
 - Age-appropriate recommendations
 - Read tracking for saved content
 
+### 7. **Comprehensive Child Profile**
+Each child has a dedicated profile with comprehensive tracking:
+
+#### Photo Journal
+- Upload and organize child photos
+- Add captions and dates
+- AI-powered photo tagging
+- Link photos to milestones
+
+#### Sleep Tracking
+- Log sleep sessions with start/end times
+- Rate sleep quality (poor, fair, good, excellent)
+- Track sleep patterns over time
+- Get AI-powered sleep insights and recommendations
+
+#### Feeding Tracker
+- Log breastfeeding, bottle feeding, solid foods, and snacks
+- Track amounts, duration, and specific food items
+- Monitor feeding patterns
+- Get AI nutrition recommendations
+
+#### Vaccine Schedule
+- Track vaccination schedule
+- Record administered vaccines with dates
+- Store provider information and notes
+- Set reminders for upcoming vaccines
+
+#### Growth Charts
+- Record height, weight, and head circumference
+- Track measurements over time
+- View growth trends
+- Calculate percentiles (future feature)
+
+#### Symptom History
+- Save emergency assessments
+- Track health concerns over time
+- Share history with pediatricians
+
+#### Developmental Activities
+- Browse age-appropriate activities
+- Activities across 5 categories: Physical, Cognitive, Social, Language, Creative
+- Track completed activities
+- Rate activity effectiveness
+
+#### Pediatrician Notes
+- Record doctor visit details
+- Store diagnoses and prescriptions
+- Track follow-up appointments
+- Keep all medical records organized
+
 ## Tech Stack
 
 - **Frontend**: React 18.3 + TypeScript
@@ -65,6 +115,15 @@ ParentAI is a comprehensive web application designed to support parents with int
 6. **daily_insights** - Personalized parenting insights
 7. **community_questions** - Community Q&A questions
 8. **community_answers** - Community Q&A answers
+9. **photo_journal** - Child photo memories with AI tagging
+10. **sleep_logs** - Sleep tracking with quality ratings
+11. **feeding_logs** - Feeding sessions and nutrition tracking
+12. **vaccine_records** - Vaccination schedule and history
+13. **growth_records** - Height, weight, and development measurements
+14. **symptom_history** - Emergency assessments and health tracking
+15. **activities** - Developmental activities library
+16. **activity_completions** - Completed activities tracking
+17. **pediatrician_notes** - Doctor visit records and prescriptions
 
 All tables include:
 - UUID primary keys
@@ -84,7 +143,15 @@ src/
 │   ├── Chat.tsx           # AI chat interface
 │   ├── Milestones.tsx     # Milestone tracking
 │   ├── Emergency.tsx      # Emergency helper
-│   └── Community.tsx      # Community Q&A
+│   ├── Community.tsx      # Community Q&A
+│   └── ChildProfile.tsx   # Comprehensive child profile
+├── components/
+│   ├── PhotoJournal.tsx   # Photo upload and gallery
+│   ├── SleepTracker.tsx   # Sleep logging with AI insights
+│   ├── FeedingTracker.tsx # Feeding session logging
+│   ├── VaccineRecords.tsx # Vaccination schedule
+│   ├── GrowthTracker.tsx  # Growth measurements
+│   └── DoctorNotes.tsx    # Pediatrician visit records
 ├── contexts/
 │   └── AuthContext.tsx    # Auth state management
 ├── lib/
@@ -236,22 +303,26 @@ Password: password123
 
 ## Deployment
 
-### Vercel (Recommended)
-```bash
-npm run build
-# Deploy dist/ folder to Vercel
-```
+**📖 For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)**
 
-### Docker
-```bash
-docker build -t parentai .
-docker run -p 3000:3000 parentai
-```
+### Quick Deploy Options
 
-### Environment Setup for Production
+#### Vercel (Recommended)
+1. Push code to GitHub
+2. Import to Vercel
+3. Add environment variables
+4. Deploy automatically
+
+#### Netlify
+1. Connect GitHub repository
+2. Configure build settings
+3. Add environment variables
+4. Deploy
+
+### Environment Variables Required
 ```
-VITE_SUPABASE_URL=<production-url>
-VITE_SUPABASE_ANON_KEY=<production-key>
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
 ```
 
 ## Troubleshooting
