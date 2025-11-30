@@ -27,12 +27,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+    const groqApiKey = Deno.env.get("GROQ_API_KEY");
 
-    if (!openaiApiKey) {
+    if (!groqApiKey) {
       return new Response(
         JSON.stringify({ 
-          error: "OpenAI API key not configured",
+          error: "Groq API key not configured",
           useFallback: true 
         }),
         {
@@ -54,14 +54,14 @@ Deno.serve(async (req: Request) => {
       }
     ];
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${openaiApiKey}`,
+        "Authorization": `Bearer ${groqApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "llama-3.1-70b-versatile",
         messages: messages,
         temperature: 0.7,
         max_tokens: 500,
@@ -70,7 +70,7 @@ Deno.serve(async (req: Request) => {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("OpenAI API error:", error);
+      console.error("Groq API error:", error);
       return new Response(
         JSON.stringify({ 
           error: "Failed to get AI response",
