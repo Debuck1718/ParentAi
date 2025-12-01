@@ -102,7 +102,7 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/ParentAi">
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>
