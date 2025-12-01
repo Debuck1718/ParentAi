@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://adjetadjetey45@gmail.com.github.io/ParentAi",
+  "homepage": "https://parentaiapp.io/ParentAi",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
